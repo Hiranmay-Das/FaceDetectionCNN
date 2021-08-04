@@ -116,7 +116,7 @@ def show_faces(img, faces):
         show_img(img[y1:y2, x1:x2], f"Face {i}", 1000)
 
 
-def save_faces(img, faces, path):
+def save_faces(img, faces, file_count, path):
     """
 
     Saves all the detected faces in the given path along with the original image.
@@ -124,6 +124,7 @@ def save_faces(img, faces, path):
     --Parameters--
     img - Matrix of the type CV_8U containing an image where objects are detected.
     faces - A NumPy array containing the matrices of detected objects.
+    file_count - Index of the image from which the faces have been extracted.
     path - Directory path provided by the user where the faces will be saved.
 
     """
@@ -134,7 +135,7 @@ def save_faces(img, faces, path):
     for i, face in enumerate(faces, start=1):
         x1, y1, w, h = face
         x2, y2 = x1 + w, y1 + h
-        cv2.imwrite(os.path.join(path, f"Face {i}.png"), img[y1:y2, x1:x2])
+        cv2.imwrite(os.path.join(path, f"{file_count} - {i}.png"), img[y1:y2, x1:x2])
 
 
 def change_file_names(path):
@@ -182,9 +183,9 @@ def crop_faces():
         # faces = Open_CV(img)
 
         # Detecting Faces using MTCNN from http://github.com/ipazc/mtcnn
-        faces = MT_CNN(img, min_face_size=50, scale_factor=0.9)
+        faces = MT_CNN(img, min_face_size=60, scale_factor=0.9)
 
         faces_folder_path = os.path.join(faces_folder, f"Image-{file_count}")
         os.mkdir(faces_folder_path)
-        save_faces(img, faces, path=faces_folder_path)
+        save_faces(img, faces, file_count, path=faces_folder_path)
         file_count += 1
