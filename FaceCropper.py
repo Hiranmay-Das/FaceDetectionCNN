@@ -130,12 +130,13 @@ def save_faces(img, faces, file_count, path):
     """
 
     image_with_boxes = draw_bounding_boxes(img.copy(), faces)
-    cv2.imwrite(os.path.join(path, "original.png"), image_with_boxes)
+    cv2.imwrite(os.path.join(path, "Original.png"), image_with_boxes)
 
     for i, face in enumerate(faces, start=1):
         x1, y1, w, h = face
         x2, y2 = x1 + w, y1 + h
-        cv2.imwrite(os.path.join(path, f"{file_count} - {i}.png"), img[y1:y2, x1:x2])
+        cv2.imwrite(os.path.join(
+            path, f"{file_count} - {i}.png"), img[y1:y2, x1:x2])
 
 
 def change_file_names(path):
@@ -189,3 +190,10 @@ def crop_faces():
         os.mkdir(faces_folder_path)
         save_faces(img, faces, file_count, path=faces_folder_path)
         file_count += 1
+
+    os.system("clear" if os.name == "posix" else "cls")
+    print("FACES EXTRACTED AND SAVED.")
+
+
+if __name__ == "__main__":
+    crop_faces()
