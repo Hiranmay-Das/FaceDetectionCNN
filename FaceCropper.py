@@ -4,6 +4,16 @@ import shutil
 from mtcnn.mtcnn import MTCNN
 
 
+# This line is for hiding the warning messages provided by Tensorflow.
+# Level | Level for Humans | Level Description
+#  -------|------------------|------------------------------------
+#   0     | DEBUG            | [Default] Print all messages
+#   1     | INFO             | Filter out INFO messages
+#   2     | WARNING          | Filter out INFO & WARNING messages
+#   3     | ERROR            | Filter out all messages
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+
+
 def Open_CV(img, scaleFactor=1.3, minNeighbours=3, minSize=(0, 0), greyScale=True):
     """
     Reads an Image and detects the faces in this image using
@@ -25,9 +35,7 @@ def Open_CV(img, scaleFactor=1.3, minNeighbours=3, minSize=(0, 0), greyScale=Tru
     #     raise FileNotFoundError(
     #         "The path specified is incorrect or the file doesnot exist.")
     if greyScale:
-        final_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    else:
-        final_img = img
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     CASCADE_PATH = [
         "A:\\Desktop\\Misc\\Python\\Object Classification NN\\venv\\Lib\\site-packages\\cv2\\data\\haarcascade_frontalface_default.xml",
         "A:\\Desktop\\Misc\\Python\\Object Classification NN\\venv\\Lib\\site-packages\\cv2\\data\\haarcascade_frontalface_alt.xml",
@@ -35,7 +43,7 @@ def Open_CV(img, scaleFactor=1.3, minNeighbours=3, minSize=(0, 0), greyScale=Tru
     ]
     faceCascade = cv2.CascadeClassifier(CASCADE_PATH[0])
     faces = faceCascade.detectMultiScale(
-        final_img,
+        img,
         scaleFactor=scaleFactor,
         minNeighbors=minNeighbours,
         minSize=minSize
@@ -57,12 +65,7 @@ def MT_CNN(img, min_face_size=20, scale_factor=0.709):
     """
     model = MTCNN(min_face_size=min_face_size, scale_factor=scale_factor)
     faces = model.detect_faces(img)
-    # return faces
     return list(map(lambda x: x['box'], faces))
-
-
-def MMOD_CNN(self):
-    pass
 
 
 def draw_bounding_boxes(img, faces, color=(0, 255, 0), thickness=2):
@@ -79,6 +82,10 @@ def draw_bounding_boxes(img, faces, color=(0, 255, 0), thickness=2):
     for x, y, w, h in faces:
         cv2.rectangle(img, (x, y), (x+w, y+h), color, thickness)
     return img
+
+
+def resize_img(img, required_size=(160, 160)):
+    return cv2.resize(img, required_size)
 
 
 def show_img(img, title='Title', time=0):
@@ -98,7 +105,7 @@ def show_img(img, title='Title', time=0):
     # ----EXPERIMENTAL----
     # NEEDS TO BE DELETED
     if key == 27:
-        raise SystemExit
+        raise StopIteration("Esc key pressed during Image Slideshow.")
 
 
 def show_faces(img, faces):
@@ -135,8 +142,11 @@ def save_faces(img, faces, file_count, path):
     for i, face in enumerate(faces, start=1):
         x1, y1, w, h = face
         x2, y2 = x1 + w, y1 + h
+        face = img[y1:y2, x1:x2]
+        face = resize_img(face)
+
         cv2.imwrite(os.path.join(
-            path, f"{file_count} - {i}.png"), img[y1:y2, x1:x2])
+            path, f"{file_count} - {i}.png"), face)
 
 
 def change_file_names(path):
@@ -154,7 +164,7 @@ def change_file_names(path):
         img_count += 1
 
 
-def crop_faces():
+def extract_faces():
     """
     Extracts faces from all the images present in the 'training' folder. 
     Cropped faces are stored in serialized folders inside the main image folder.
@@ -185,7 +195,6 @@ def crop_faces():
 
         # Detecting Faces using MTCNN from http://github.com/ipazc/mtcnn
         faces = MT_CNN(img, min_face_size=60, scale_factor=0.9)
-
         faces_folder_path = os.path.join(faces_folder, f"Image-{file_count}")
         os.mkdir(faces_folder_path)
         save_faces(img, faces, file_count, path=faces_folder_path)
@@ -196,4 +205,4 @@ def crop_faces():
 
 
 if __name__ == "__main__":
-    crop_faces()
+    extract_faces()
