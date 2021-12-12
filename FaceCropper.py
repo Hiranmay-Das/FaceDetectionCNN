@@ -180,7 +180,7 @@ def extract_faces():
     file_count = 1
     for file in os.scandir(img_folder):
         # If the current path is a directory, then skip.
-        if os.path.isdir(file.path):
+        if file.is_dir():
             continue
 
         # Reading the Image to a NumPy array
