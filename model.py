@@ -1,7 +1,6 @@
 from tensorflow.keras.utils import image_dataset_from_directory
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Convolution2D, MaxPool2D, Flatten, Dense, Rescaling, Dropout, RandomFlip, RandomRotation, RandomZoom
-from tensorflow.keras.applications import ResNet152V2
 import random
 
 SEED = random.randint(0, 1000)
@@ -12,7 +11,10 @@ NUMBER_OF_CLASSES = 6
 EPOCHS = 10
 
 def load_data():
-    train_data_dir = "dataset//train/labelled data"
+    """
+    Loads the data from the directory and returns the train and validation data
+    """
+    train_data_dir = "dataset/train/labelled data"
     train_data = image_dataset_from_directory(
         train_data_dir,
         seed=SEED,
@@ -50,7 +52,10 @@ def load_data():
     return train_data, validation_data
 
 
-def load_model():
+def train_model():
+    """
+    Creates a Sequential CNN model and then trains it using the train and validation data
+    """
     train_data, validation_data = load_data()
     model = Sequential()
     model.add(Rescaling(1./255, input_shape=(IMG_WIDTH, IMG_HEIGHT, 3)))
@@ -84,6 +89,13 @@ def load_model():
         validation_steps=10)
     return model
 
+
+def save_model(model, name = "model"):
+    """
+    Saves the model to a file
+    """
+    model.save(f"{name}.h5")
+
 if __name__ == "__main__":
-    model = load_model()
+    model = train_model()
     model.save("model.h5")
